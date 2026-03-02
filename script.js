@@ -152,7 +152,7 @@ dots.forEach(dot => {
     });
 });
 
-// --- UNIQUE FEATURE 4: Solid 3D DNA Helix (Up & Right) ---
+// --- UNIQUE FEATURE 4: Microscopic Random DNA Array ---
 const canvas = document.createElement('canvas');
 canvas.id = 'bio-canvas';
 document.body.prepend(canvas);
@@ -164,8 +164,8 @@ canvas.style.width = '100vw';
 canvas.style.height = '100vh';
 canvas.style.zIndex = '-1';
 canvas.style.pointerEvents = 'none';
-// Subtle opacity so the bright colors don't distract from the text
-canvas.style.opacity = '0.35'; 
+// Set opacity around 60% as requested
+canvas.style.opacity = '0.6'; 
 
 const ctx = canvas.getContext('2d');
 
@@ -180,18 +180,20 @@ class DNAStrand {
     constructor() {
         this.x = Math.random() * canvas.width; 
         this.y = Math.random() * canvas.height; 
-        this.length = Math.random() * 300 + 200; // Total length of the strand
-        this.amplitude = Math.random() * 20 + 20; // Width of the helix
         
-        // Velocity: Positive X (Right), Negative Y (Up)
-        this.speedX = Math.random() * 0.4 + 0.2; 
-        this.speedY = Math.random() * -0.4 - 0.2; 
+        // Much smaller sizes
+        this.length = Math.random() * 80 + 50; // Random length between 50-130px
+        this.amplitude = Math.random() * 6 + 4; // Much narrower helix
         
-        this.rotationSpeed = (Math.random() - 0.5) * 0.03; // Twist speed
+        // Completely random directions (up, down, left, right)
+        this.speedX = (Math.random() - 0.5) * 1.2; 
+        this.speedY = (Math.random() - 0.5) * 1.2; 
+        
+        this.rotationSpeed = (Math.random() - 0.5) * 0.08; // Slightly faster twist for small DNA
         this.time = Math.random() * 100;
         
-        // Tilt angle so it points up and right (approx 45 degrees)
-        this.tiltAngle = Math.PI / 4; 
+        // Random orientation angle from 0 to 360 degrees
+        this.tiltAngle = Math.random() * Math.PI * 2; 
     }
 
     update() {
@@ -199,11 +201,12 @@ class DNAStrand {
         this.y += this.speedY;
         this.time += this.rotationSpeed;
 
-        // Screen wrap: If it goes too far right or up, reset to bottom-left
+        // Screen wrap: smoothly reappear on the opposite side if they float off screen
         if (this.x > canvas.width + this.length) this.x = -this.length;
-        if (this.y < -this.length) this.y = canvas.height + this.length;
+        else if (this.x < -this.length) this.x = canvas.width + this.length;
+        
         if (this.y > canvas.height + this.length) this.y = -this.length;
-        if (this.x < -this.length) this.x = canvas.width + this.length;
+        else if (this.y < -this.length) this.y = canvas.height + this.length;
 
         this.draw();
     }
@@ -213,28 +216,26 @@ class DNAStrand {
         ctx.translate(this.x, this.y);
         ctx.rotate(this.tiltAngle);
 
-        const spacing = 22; // Distance between base pairs
-        const frequency = 0.05; // Tightness of the twists
+        const spacing = 8; // Closer spacing for smaller strands
+        const frequency = 0.12; // Tighter twists
 
-        // Colors matching your reference image
-        const backbone1Color = '#3498db'; // Blue
-        const backbone2Color = '#e67e22'; // Orange
+        const backbone1Color = '#3498db'; 
+        const backbone2Color = '#e67e22'; 
         const pairs = [
-            ['#2980b9', '#c0392b'], // Blue - Red (Cytosine - Guanine)
-            ['#f1c40f', '#8e44ad']  // Yellow - Purple (Adenine - Thymine)
+            ['#2980b9', '#c0392b'], 
+            ['#f1c40f', '#8e44ad']  
         ];
 
         // 1. Draw the "BACK" half of the backbones first
-        ctx.lineWidth = 6;
+        ctx.lineWidth = 2.5; // Thinner lines
         ctx.lineCap = 'round';
         ctx.lineJoin = 'round';
 
-        // Back Backbone 1
         ctx.beginPath();
-        for (let i = 0; i <= this.length; i += 3) {
+        for (let i = 0; i <= this.length; i += 2) {
             let phase = i * frequency + this.time;
             let x = Math.sin(phase) * this.amplitude;
-            let z = Math.cos(phase); // Z determines depth
+            let z = Math.cos(phase); 
             let y = i - this.length / 2;
             if (z < 0) ctx.lineTo(x, y);
             else ctx.moveTo(x, y);
@@ -242,9 +243,8 @@ class DNAStrand {
         ctx.strokeStyle = backbone1Color;
         ctx.stroke();
 
-        // Back Backbone 2
         ctx.beginPath();
-        for (let i = 0; i <= this.length; i += 3) {
+        for (let i = 0; i <= this.length; i += 2) {
             let phase = i * frequency + this.time + Math.PI;
             let x = Math.sin(phase) * this.amplitude;
             let z = Math.cos(phase);
@@ -255,25 +255,22 @@ class DNAStrand {
         ctx.strokeStyle = backbone2Color;
         ctx.stroke();
 
-        // 2. Draw the Base Pairs (Rungs of the ladder)
-        ctx.lineWidth = 4;
+        // 2. Draw the Base Pairs
+        ctx.lineWidth = 1.5; // Thinner base pairs
         for (let i = 0; i <= this.length; i += spacing) {
             let phase = i * frequency + this.time;
             let x1 = Math.sin(phase) * this.amplitude;
             let x2 = Math.sin(phase + Math.PI) * this.amplitude;
             let y = i - this.length / 2;
             
-            // Alternate base pair colors based on index
             let colorSet = pairs[(i / spacing) % 2 === 0 ? 0 : 1];
 
-            // Draw left side of the base pair
             ctx.beginPath();
             ctx.moveTo(x1, y);
             ctx.lineTo(0, y);
             ctx.strokeStyle = colorSet[0];
             ctx.stroke();
 
-            // Draw right side of the base pair
             ctx.beginPath();
             ctx.moveTo(0, y);
             ctx.lineTo(x2, y);
@@ -281,12 +278,11 @@ class DNAStrand {
             ctx.stroke();
         }
 
-        // 3. Draw the "FRONT" half of the backbones last to cover the base pairs
-        ctx.lineWidth = 6;
+        // 3. Draw the "FRONT" half of the backbones last
+        ctx.lineWidth = 2.5;
         
-        // Front Backbone 1
         ctx.beginPath();
-        for (let i = 0; i <= this.length; i += 3) {
+        for (let i = 0; i <= this.length; i += 2) {
             let phase = i * frequency + this.time;
             let x = Math.sin(phase) * this.amplitude;
             let z = Math.cos(phase);
@@ -297,9 +293,8 @@ class DNAStrand {
         ctx.strokeStyle = backbone1Color;
         ctx.stroke();
 
-        // Front Backbone 2
         ctx.beginPath();
-        for (let i = 0; i <= this.length; i += 3) {
+        for (let i = 0; i <= this.length; i += 2) {
             let phase = i * frequency + this.time + Math.PI;
             let x = Math.sin(phase) * this.amplitude;
             let z = Math.cos(phase);
@@ -315,8 +310,8 @@ class DNAStrand {
 }
 
 let dnaArray = [];
-// Draw 6 large, detailed strands floating across the screen
-for (let i = 0; i < 6; i++) {
+// Draw 25 smaller strands floating randomly
+for (let i = 0; i < 25; i++) {
     dnaArray.push(new DNAStrand());
 }
 
