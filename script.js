@@ -152,12 +152,11 @@ dots.forEach(dot => {
     });
 });
 
-// --- UNIQUE FEATURE 4: Abstract DNA Helix Background ---
+// --- UNIQUE FEATURE 4: Solid 3D DNA Helix (Up & Right) ---
 const canvas = document.createElement('canvas');
 canvas.id = 'bio-canvas';
 document.body.prepend(canvas);
 
-// Style the canvas to sit behind everything
 canvas.style.position = 'fixed';
 canvas.style.top = '0';
 canvas.style.left = '0';
@@ -165,7 +164,8 @@ canvas.style.width = '100vw';
 canvas.style.height = '100vh';
 canvas.style.zIndex = '-1';
 canvas.style.pointerEvents = 'none';
-canvas.style.opacity = '0.8'
+// Subtle opacity so the bright colors don't distract from the text
+canvas.style.opacity = '0.35'; 
 
 const ctx = canvas.getContext('2d');
 
@@ -176,79 +176,147 @@ function resizeCanvas() {
 window.addEventListener('resize', resizeCanvas);
 resizeCanvas();
 
-// Class to generate floating DNA molecules
 class DNAStrand {
     constructor() {
-        this.x = Math.random() * canvas.width; // Random horizontal start
-        this.y = Math.random() * canvas.height + canvas.height; // Start below screen
-        this.length = Math.random() * 200 + 150; // Random length between 150-350px
-        this.amplitude = Math.random() * 15 + 15; // Width of the helix
-        this.speedY = Math.random() * -0.6 - 0.2; // Float up slowly
-        this.rotationSpeed = (Math.random() - 0.5) * 0.04; // Twist speed
+        this.x = Math.random() * canvas.width; 
+        this.y = Math.random() * canvas.height; 
+        this.length = Math.random() * 300 + 200; // Total length of the strand
+        this.amplitude = Math.random() * 20 + 20; // Width of the helix
+        
+        // Velocity: Positive X (Right), Negative Y (Up)
+        this.speedX = Math.random() * 0.4 + 0.2; 
+        this.speedY = Math.random() * -0.4 - 0.2; 
+        
+        this.rotationSpeed = (Math.random() - 0.5) * 0.03; // Twist speed
         this.time = Math.random() * 100;
-        this.opacity = Math.random() * 0.4 + 0.2;
+        
+        // Tilt angle so it points up and right (approx 45 degrees)
+        this.tiltAngle = Math.PI / 4; 
     }
 
     update() {
+        this.x += this.speedX;
         this.y += this.speedY;
         this.time += this.rotationSpeed;
 
-        // If the strand floats completely past the top of the screen, reset to bottom
-        if (this.y < 0) {
-            this.y = canvas.height + this.length;
-            this.x = Math.random() * canvas.width;
-        }
+        // Screen wrap: If it goes too far right or up, reset to bottom-left
+        if (this.x > canvas.width + this.length) this.x = -this.length;
+        if (this.y < -this.length) this.y = canvas.height + this.length;
+        if (this.y > canvas.height + this.length) this.y = -this.length;
+        if (this.x < -this.length) this.x = canvas.width + this.length;
+
         this.draw();
     }
 
     draw() {
-        const spacing = 15; // Distance between base pairs
-        const frequency = 0.06; // How tight the twists are
-        
-        // Grab the current accent color from CSS
-        const rootStyles = getComputedStyle(document.documentElement);
-        const accentColor = rootStyles.getPropertyValue('--accent').trim() || '#10b981';
-        
-        ctx.fillStyle = accentColor;
-        ctx.strokeStyle = accentColor;
-        ctx.lineWidth = 1.2;
+        ctx.save();
+        ctx.translate(this.x, this.y);
+        ctx.rotate(this.tiltAngle);
 
-        for (let i = 0; i < this.length; i += spacing) {
-            const angle = i * frequency + this.time;
+        const spacing = 22; // Distance between base pairs
+        const frequency = 0.05; // Tightness of the twists
+
+        // Colors matching your reference image
+        const backbone1Color = '#3498db'; // Blue
+        const backbone2Color = '#e67e22'; // Orange
+        const pairs = [
+            ['#2980b9', '#c0392b'], // Blue - Red (Cytosine - Guanine)
+            ['#f1c40f', '#8e44ad']  // Yellow - Purple (Adenine - Thymine)
+        ];
+
+        // 1. Draw the "BACK" half of the backbones first
+        ctx.lineWidth = 6;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+
+        // Back Backbone 1
+        ctx.beginPath();
+        for (let i = 0; i <= this.length; i += 3) {
+            let phase = i * frequency + this.time;
+            let x = Math.sin(phase) * this.amplitude;
+            let z = Math.cos(phase); // Z determines depth
+            let y = i - this.length / 2;
+            if (z < 0) ctx.lineTo(x, y);
+            else ctx.moveTo(x, y);
+        }
+        ctx.strokeStyle = backbone1Color;
+        ctx.stroke();
+
+        // Back Backbone 2
+        ctx.beginPath();
+        for (let i = 0; i <= this.length; i += 3) {
+            let phase = i * frequency + this.time + Math.PI;
+            let x = Math.sin(phase) * this.amplitude;
+            let z = Math.cos(phase);
+            let y = i - this.length / 2;
+            if (z < 0) ctx.lineTo(x, y);
+            else ctx.moveTo(x, y);
+        }
+        ctx.strokeStyle = backbone2Color;
+        ctx.stroke();
+
+        // 2. Draw the Base Pairs (Rungs of the ladder)
+        ctx.lineWidth = 4;
+        for (let i = 0; i <= this.length; i += spacing) {
+            let phase = i * frequency + this.time;
+            let x1 = Math.sin(phase) * this.amplitude;
+            let x2 = Math.sin(phase + Math.PI) * this.amplitude;
+            let y = i - this.length / 2;
             
-            // X coordinates for the two backbones
-            const x1 = this.x + Math.sin(angle) * this.amplitude;
-            const x2 = this.x + Math.sin(angle + Math.PI) * this.amplitude;
-            const drawY = this.y - i; // Draw upwards from base Y
+            // Alternate base pair colors based on index
+            let colorSet = pairs[(i / spacing) % 2 === 0 ? 0 : 1];
 
-            // 3D Depth perception scale (makes dots look like they wrap around)
-            const scale1 = Math.cos(angle) * 0.5 + 1;
-            const scale2 = Math.cos(angle + Math.PI) * 0.5 + 1;
-
-            // Draw connecting lines (Hydrogen bonds)
-            ctx.globalAlpha = this.opacity * 0.3;
+            // Draw left side of the base pair
             ctx.beginPath();
-            ctx.moveTo(x1, drawY);
-            ctx.lineTo(x2, drawY);
+            ctx.moveTo(x1, y);
+            ctx.lineTo(0, y);
+            ctx.strokeStyle = colorSet[0];
             ctx.stroke();
 
-            // Draw Nodes (Sugar/Phosphate backbone)
-            ctx.globalAlpha = this.opacity;
+            // Draw right side of the base pair
             ctx.beginPath();
-            ctx.arc(x1, drawY, 2 * scale1, 0, Math.PI * 2);
-            ctx.fill();
-
-            ctx.beginPath();
-            ctx.arc(x2, drawY, 2 * scale2, 0, Math.PI * 2);
-            ctx.fill();
+            ctx.moveTo(0, y);
+            ctx.lineTo(x2, y);
+            ctx.strokeStyle = colorSet[1];
+            ctx.stroke();
         }
+
+        // 3. Draw the "FRONT" half of the backbones last to cover the base pairs
+        ctx.lineWidth = 6;
+        
+        // Front Backbone 1
+        ctx.beginPath();
+        for (let i = 0; i <= this.length; i += 3) {
+            let phase = i * frequency + this.time;
+            let x = Math.sin(phase) * this.amplitude;
+            let z = Math.cos(phase);
+            let y = i - this.length / 2;
+            if (z >= 0) ctx.lineTo(x, y);
+            else ctx.moveTo(x, y);
+        }
+        ctx.strokeStyle = backbone1Color;
+        ctx.stroke();
+
+        // Front Backbone 2
+        ctx.beginPath();
+        for (let i = 0; i <= this.length; i += 3) {
+            let phase = i * frequency + this.time + Math.PI;
+            let x = Math.sin(phase) * this.amplitude;
+            let z = Math.cos(phase);
+            let y = i - this.length / 2;
+            if (z >= 0) ctx.lineTo(x, y);
+            else ctx.moveTo(x, y);
+        }
+        ctx.strokeStyle = backbone2Color;
+        ctx.stroke();
+
+        ctx.restore();
     }
 }
 
 let dnaArray = [];
-// Create enough strands based on screen width (not too crowded)
-const numStrands = Math.max(4, Math.floor(window.innerWidth / 200)); 
-for (let i = 0; i < numStrands; i++) {
+// Draw 6 large, detailed strands floating across the screen
+for (let i = 0; i < 6; i++) {
     dnaArray.push(new DNAStrand());
 }
 
