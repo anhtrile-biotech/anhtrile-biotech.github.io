@@ -161,3 +161,78 @@ dots.forEach(dot => {
         updateSlider();
     });
 });
+
+// --- UNIQUE FEATURE 4: "Living Cells" Background Particle System ---
+const canvas = document.createElement('canvas');
+canvas.id = 'bio-canvas';
+document.body.prepend(canvas);
+
+// Style the canvas to sit behind everything
+canvas.style.position = 'fixed';
+canvas.style.top = '0';
+canvas.style.left = '0';
+canvas.style.width = '100vw';
+canvas.style.height = '100vh';
+canvas.style.zIndex = '-1';
+canvas.style.pointerEvents = 'none'; // Ensures it doesn't block clicks
+canvas.style.opacity = '0.35'; // Keep it subtle!
+
+const ctx = canvas.getContext('2d');
+let cells = [];
+
+// Handle window resizing
+function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+}
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
+
+// Define the Cell behavior
+class Cell {
+    constructor() {
+        this.x = Math.random() * canvas.width;
+        this.y = Math.random() * canvas.height;
+        this.radius = Math.random() * 2.5 + 0.5; // Random cell sizes
+        this.vx = (Math.random() - 0.5) * 0.4; // Very slow, organic movement
+        this.vy = (Math.random() - 0.5) * 0.4;
+        this.alpha = Math.random() * 0.5 + 0.1; // Random opacity
+    }
+    
+    draw() {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        
+        // Grab the current accent color from your CSS theme toggle
+        const rootStyles = getComputedStyle(document.documentElement);
+        const accentColor = rootStyles.getPropertyValue('--accent').trim() || '#10b981';
+        
+        ctx.fillStyle = accentColor;
+        ctx.globalAlpha = this.alpha;
+        ctx.fill();
+    }
+    
+    update() {
+        this.x += this.vx;
+        this.y += this.vy;
+
+        // Bounce gently off the edges of the screen
+        if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
+        if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
+
+        this.draw();
+    }
+}
+
+// Generate the cells (Adjust the '60' to add more or fewer cells)
+for (let i = 0; i < 60; i++) {
+    cells.push(new Cell());
+}
+
+// Animation loop
+function animateCells() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    cells.forEach(cell => cell.update());
+    requestAnimationFrame(animateCells);
+}
+animateCells();

@@ -1,13 +1,10 @@
 :root {
-    /* Deeper, slightly teal-tinted dark background */
-    --bg: #0a1315; 
-    --card: #121e22; 
-    /* Vibrant emerald/bio-green for the accent */
-    --accent: #10b981; 
+    --bg: #0b1121; /* Very dark midnight blue */
+    --card: #162032; /* Slightly lighter navy for cards */
+    --accent: #10b981; /* Keeps your bio-green accent */
     --text: #cbd5e1;
     --text-bright: #ffffff;
 }
-
 [data-theme="light"] {
     /* Very faint mint/teal tint for a clean lab feel */
     --bg: #f0fdfa; 
