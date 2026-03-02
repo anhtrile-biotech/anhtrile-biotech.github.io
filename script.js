@@ -152,7 +152,7 @@ dots.forEach(dot => {
     });
 });
 
-// --- UNIQUE FEATURE 4: Dual-Layer Bio Background ---
+// --- UNIQUE FEATURE 4: Dual-Layer Bio Background (Small Complex Molecules + DNA) ---
 const canvas = document.createElement('canvas');
 canvas.id = 'bio-canvas';
 document.body.prepend(canvas);
@@ -164,7 +164,7 @@ canvas.style.width = '100vw';
 canvas.style.height = '100vh';
 canvas.style.zIndex = '-1';
 canvas.style.pointerEvents = 'none';
-canvas.style.opacity = '0.5';
+canvas.style.opacity = '0.5'; // Base canvas opacity
 
 const ctx = canvas.getContext('2d');
 
@@ -175,22 +175,26 @@ function resizeCanvas() {
 window.addEventListener('resize', resizeCanvas);
 resizeCanvas();
 
-// Layer 1: Large Ball-and-Stick Molecules
+// Layer 1: Ball-and-Stick Molecules (Now smaller!)
 class BallAndStickMolecule {
     constructor() {
         this.x = Math.random() * canvas.width;
         this.y = Math.random() * canvas.height;
-        this.scale = Math.random() * 1.5 + 1.0; // Size multiplier
+        
+        // REDUCED SIZE: Scales are much smaller now
+        this.scale = Math.random() * 0.6 + 0.4; // Previously 1.0 to 2.5
+        this.baseSize = Math.random() * 30 + 30; // Previously 80 to 120
         
         // Very slow, random drift
-        this.vx = (Math.random() - 0.5) * 0.2;
-        this.vy = (Math.random() - 0.5) * 0.2;
+        this.vx = (Math.random() - 0.5) * 0.15;
+        this.vy = (Math.random() - 0.5) * 0.15;
         
-        // Slow rotation
+        // Slow rotation as a single unit
         this.rotation = Math.random() * Math.PI * 2;
         this.rotationSpeed = (Math.random() - 0.5) * 0.005;
         
-        this.alpha = Math.random() * 0.4 + 0.15; // Soft opacity
+        // Faint, varied opacity
+        this.alpha = Math.random() * 0.3 + 0.1;
         
         this.nodes = [];
         this.edges = [];
@@ -234,11 +238,11 @@ class BallAndStickMolecule {
         this.rotation += this.rotationSpeed;
 
         // Screen wrap
-        const wrapMargin = 150 * this.scale;
-        if (this.x > canvas.width + wrapMargin) this.x = -wrapMargin;
-        else if (this.x < -wrapMargin) this.x = canvas.width + wrapMargin;
-        if (this.y > canvas.height + wrapMargin) this.y = -wrapMargin;
-        else if (this.y < -wrapMargin) this.y = canvas.height + wrapMargin;
+        const maxRadius = this.baseSize * 1.5 * this.scale;
+        if (this.x > canvas.width + maxRadius) this.x = -maxRadius;
+        else if (this.x < -maxRadius) this.x = canvas.width + maxRadius;
+        if (this.y > canvas.height + maxRadius) this.y = -maxRadius;
+        else if (this.y < -maxRadius) this.y = canvas.height + maxRadius;
 
         this.draw(color, bgColor);
     }
@@ -251,28 +255,65 @@ class BallAndStickMolecule {
         
         ctx.globalAlpha = this.alpha;
         
-        // 1. Draw the bonds (lines)
-        ctx.lineWidth = 3;
-        ctx.strokeStyle = color;
-        ctx.beginPath();
-        this.edges.forEach(edge => {
-            const n1 = this.nodes[edge[0]];
-            const n2 = this.nodes[edge[1]];
-            ctx.moveTo(n1.x, n1.y);
-            ctx.lineTo(n2.x, n2.y);
-        });
-        ctx.stroke();
+        // --- DRAW COMPLEX SHAPE ---
+        const ringRadius = this.baseSize * 0.35;
+        const mainAtomRadius = this.baseSize * 0.14; 
+        const chainAtomRadius = this.baseSize * 0.08;
 
-        // 2. Draw the atoms (circles filled with background color so lines don't show through)
-        ctx.lineWidth = 2.5;
-        this.nodes.forEach(node => {
+        ctx.lineWidth = 1.5 * (this.baseSize / 50); // Adjusted line width for smaller sizes
+        ctx.strokeStyle = color;
+        ctx.fillStyle = bgColor; // Fill with background color to hide overlapping bonds
+
+        // Draw Central Ring (6 atoms)
+        for (let i = 0; i < 6; i++) {
+            const angle = (Math.PI * 2 * i) / 6;
+            const ax = Math.cos(angle) * ringRadius;
+            const ay = Math.sin(angle) * ringRadius;
+
+            // Draw connecting chains first so they sit behind the atoms visually
+            if (i === 0) {
+                const cx1 = ax + Math.cos(angle - Math.PI / 4) * (ringRadius * 0.8);
+                const cy1 = ay + Math.sin(angle - Math.PI / 4) * (ringRadius * 0.8);
+                ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(cx1, cy1); ctx.stroke();
+                ctx.beginPath(); ctx.arc(cx1, cy1, chainAtomRadius, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+            }
+            if (i === 1) {
+                const cx2 = ax + Math.cos(angle - Math.PI / 3) * (ringRadius * 0.7);
+                const cy2 = ay + Math.sin(angle - Math.PI / 3) * (ringRadius * 0.7);
+                ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(cx2, cy2); ctx.stroke();
+                ctx.beginPath(); ctx.arc(cx2, cy2, chainAtomRadius, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+            }
+            if (i === 2) {
+                const cx3 = ax + Math.cos(angle - Math.PI / 2) * (ringRadius * 0.6);
+                const cy3 = ay + Math.sin(angle - Math.PI / 2) * (ringRadius * 0.6);
+                ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(cx3, cy3); ctx.stroke();
+                ctx.beginPath(); ctx.arc(cx3, cy3, chainAtomRadius, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+            }
+            if (i === 3) {
+                const cx4 = ax + Math.cos(angle - Math.PI / 1.5) * (ringRadius * 0.5);
+                const cy4 = ay + Math.sin(angle - Math.PI / 1.5) * (ringRadius * 0.5);
+                ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(cx4, cy4); ctx.stroke();
+                ctx.beginPath(); ctx.arc(cx4, cy4, chainAtomRadius, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+            }
+            if (i === 4) {
+                const cx5 = ax + Math.cos(angle - Math.PI / 1.2) * (ringRadius * 0.4);
+                const cy5 = ay + Math.sin(angle - Math.PI / 1.2) * (ringRadius * 0.4);
+                ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(cx5, cy5); ctx.stroke();
+                ctx.beginPath(); ctx.arc(cx5, cy5, chainAtomRadius, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+            }
+
+            // Connect Atoms in Ring
+            const nextAngle = (Math.PI * 2 * (i + 1)) / 6;
+            const nax = Math.cos(nextAngle) * ringRadius;
+            const nay = Math.sin(nextAngle) * ringRadius;
+            ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(nax, nay); ctx.stroke();
+
+            // Draw Main Ring Atom last so it overlaps the bond lines
             ctx.beginPath();
-            ctx.arc(node.x, node.y, node.r, 0, Math.PI * 2);
-            ctx.fillStyle = bgColor; // Hide bonds underneath
+            ctx.arc(ax, ay, mainAtomRadius, 0, Math.PI * 2);
             ctx.fill();
-            ctx.strokeStyle = color; // Outline atom
             ctx.stroke();
-        });
+        }
 
         ctx.restore();
     }
@@ -393,16 +434,16 @@ class DNAStrand {
 
 // Initialize Arrays
 let dnaArray = [];
-let moleculesArray = [];
+let complexMoleculesArray = [];
 
 // Create 3 minimalist DNA strands
 for (let i = 0; i < 3; i++) {
     dnaArray.push(new DNAStrand());
 }
 
-// Create 6 large Ball-and-Stick molecules
-for (let i = 0; i < 6; i++) {
-    moleculesArray.push(new BallAndStickMolecule());
+// Create 8 smaller Ball-and-Stick molecules (increased count slightly since they are smaller)
+for (let i = 0; i < 8; i++) {
+    complexMoleculesArray.push(new BallAndStickMolecule());
 }
 
 // Animation Loop
@@ -415,7 +456,7 @@ function animateBioCanvas() {
     const bgColor = rootStyles.getPropertyValue('--bg').trim() || '#0b1121';
 
     // Draw molecules first
-    moleculesArray.forEach(mol => mol.update(themeColor, bgColor));
+    complexMoleculesArray.forEach(mol => mol.update(themeColor, bgColor));
     
     // Draw DNA on top
     dnaArray.forEach(dna => dna.update(themeColor));
