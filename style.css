@@ -1,26 +1,31 @@
 :root {
-    --bg: #0b1121; /* Very dark midnight blue */
-    --card: #162032; /* Slightly lighter navy for cards */
-    --accent: #10b981; /* Keeps your bio-green accent */
+    /* Base Dark Colors (Using Option 1: Midnight Blue) */
+    --bg: #0b1121; 
+    --card: #162032; 
+    --accent: #10b981; 
     --text: #cbd5e1;
     --text-bright: #ffffff;
-}
-[data-theme="light"] {
-    /* Very faint mint/teal tint for a clean lab feel */
-    --bg: #f0fdfa; 
-    --card: #ffffff;
-    /* Deeper clinical green for light mode readability */
-    --accent: #059669; 
-    --text: #334155;
-    --text-bright: #0f172a;
+    
+    /* NEW: Adaptive UI Elements for Dark Mode */
+    --border-color: rgba(255, 255, 255, 0.1);
+    --nav-bg: rgba(11, 17, 33, 0.85);
+    --footer-bg: #060a13;
+    --dot-bg: rgba(255, 255, 255, 0.2);
 }
 
 [data-theme="light"] {
-    --bg: #f6f8fa;
+    /* Base Light Colors */
+    --bg: #f0fdfa; 
     --card: #ffffff;
-    --accent: #0969da;
-    --text: #24292f;
-    --text-bright: #1f2328;
+    --accent: #059669; 
+    --text: #334155;
+    --text-bright: #0f172a;
+    
+    /* NEW: Adaptive UI Elements for Light Mode (High Contrast) */
+    --border-color: rgba(0, 0, 0, 0.15); /* Dark borders so cards stand out */
+    --nav-bg: rgba(240, 253, 250, 0.85); /* Light blurred navbar */
+    --footer-bg: #e2e8f0; /* Soft gray footer */
+    --dot-bg: rgba(0, 0, 0, 0.2); /* Dark dots for the slider */
 }
 
 /* Added Smooth Scrolling */
