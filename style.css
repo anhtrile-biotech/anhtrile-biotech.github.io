@@ -6,7 +6,7 @@
     --text: #cbd5e1;
     --text-bright: #ffffff;
     
-    /* NEW: Adaptive UI Elements for Dark Mode */
+    /* Adaptive UI Elements for Dark Mode */
     --border-color: rgba(255, 255, 255, 0.1);
     --nav-bg: rgba(11, 17, 33, 0.85);
     --footer-bg: #060a13;
@@ -21,7 +21,7 @@
     --text: #334155;
     --text-bright: #0f172a;
     
-    /* NEW: Adaptive UI Elements for Light Mode (High Contrast) */
+    /* Adaptive UI Elements for Light Mode (High Contrast) */
     --border-color: rgba(0, 0, 0, 0.15); /* Dark borders so cards stand out */
     --nav-bg: rgba(240, 253, 250, 0.85); /* Light blurred navbar */
     --footer-bg: #e2e8f0; /* Soft gray footer */
@@ -54,7 +54,7 @@ a:focus-visible, button:focus-visible {
     position: fixed;
     width: 100%;
     padding: 20px 0;
-    background: rgba(11, 14, 20, 0.8);
+    background: var(--nav-bg);
     backdrop-filter: blur(10px);
     z-index: 1000;
 }
@@ -111,7 +111,7 @@ a:focus-visible, button:focus-visible {
 
 .btn {
     padding: 10px 25px;
-    border-radius: 6px;
+    border-radius: 20px;
     text-decoration: none;
     font-weight: 600;
     display: inline-block;
@@ -121,7 +121,7 @@ a:focus-visible, button:focus-visible {
 
 .btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(88, 166, 255, 0.2);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
 }
 
 .primary-btn { background: var(--accent); color: white; }
@@ -142,7 +142,7 @@ a:focus-visible, button:focus-visible {
 .content-box {
     background: var(--card);
     padding: 40px;
-    border-radius: 12px;
+    border-radius: 20px;
     width: 100%;
 }
 
@@ -150,7 +150,7 @@ a:focus-visible, button:focus-visible {
     color: var(--text-bright);
     margin-top: 0;
     margin-bottom: 30px;
-    border-bottom: 2px solid rgba(255, 255, 255, 0.05);
+    border-bottom: 2px solid var(--border-color);
     padding-bottom: 10px;
 }
 
@@ -207,7 +207,7 @@ a:focus-visible, button:focus-visible {
     background: var(--bg);
     border-left: 4px solid var(--accent);
     padding: 25px;
-    border-radius: 0 12px 12px 0;
+    border-radius: 0 20px 20px 0;
     transition: transform 0.3s ease;
 }
 
@@ -246,7 +246,6 @@ a:focus-visible, button:focus-visible {
 /* Certification Gallery Styles */
 .cert-gallery {
     display: grid;
-    /* Updated to use min() for better fluidity on very small screens */
     grid-template-columns: repeat(auto-fit, minmax(min(100%, 350px), 1fr));
     gap: 30px;
     margin-top: 30px;
@@ -254,8 +253,8 @@ a:focus-visible, button:focus-visible {
 
 .cert-card {
     background: var(--bg);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 16px;
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
     padding: 20px;
     transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     position: relative;
@@ -291,7 +290,7 @@ a:focus-visible, button:focus-visible {
     border-radius: 10px;
     overflow: hidden;
     margin-bottom: 15px;
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-color);
 }
 
 .cert-doc {
@@ -360,9 +359,9 @@ a:focus-visible, button:focus-visible {
 /* Experience & Project Styling */
 .experience-card {
     background: var(--bg);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-color);
     padding: 30px;
-    border-radius: 12px;
+    border-radius: 20px;
     margin-top: 20px;
 }
 
@@ -371,7 +370,7 @@ a:focus-visible, button:focus-visible {
     justify-content: space-between;
     align-items: flex-start;
     margin-bottom: 20px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid var(--border-color);
     padding-bottom: 15px;
 }
 
@@ -406,7 +405,7 @@ a:focus-visible, button:focus-visible {
 }
 
 .date-badge {
-    background: rgba(88, 166, 255, 0.1);
+    background: rgba(16, 185, 129, 0.1);
     color: var(--accent);
     padding: 5px 12px;
     border-radius: 6px;
@@ -434,9 +433,9 @@ a:focus-visible, button:focus-visible {
 
 .p-card {
     background: var(--bg);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-color);
     padding: 25px;
-    border-radius: 12px;
+    border-radius: 20px;
     transition: transform 0.3s ease;
 }
 
@@ -478,6 +477,7 @@ a:focus-visible, button:focus-visible {
         gap: 5px;
     }
 }
+
 /* --- Interests Visual Grid --- */
 .interests-grid {
     display: grid;
@@ -491,8 +491,8 @@ a:focus-visible, button:focus-visible {
     border-radius: 10px;
     overflow: hidden;
     height: 130px;
-    background-color: #000; /* Fallback background */
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    background-color: #000;
+    border: 1px solid var(--border-color);
     transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
 }
 
@@ -506,13 +506,13 @@ a:focus-visible, button:focus-visible {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    opacity: 0.45; /* Darken the image so text pops */
+    opacity: 0.45;
     transition: opacity 0.4s ease, transform 0.4s ease;
 }
 
 .interest-card:hover .interest-img {
     opacity: 0.7;
-    transform: scale(1.1); /* Slight zoom effect on hover */
+    transform: scale(1.1);
 }
 
 .interest-info {
@@ -526,7 +526,7 @@ a:focus-visible, button:focus-visible {
     display: flex;
     flex-direction: column;
     gap: 5px;
-    pointer-events: none; /* Prevents text from blocking hover effect */
+    pointer-events: none;
 }
 
 .interest-info i {
@@ -547,7 +547,7 @@ a:focus-visible, button:focus-visible {
     display: flex;
     align-items: center;
     gap: 15px;
-    background: rgba(88, 166, 255, 0.08);
+    background: rgba(16, 185, 129, 0.08);
     padding: 15px;
     border-radius: 10px;
     color: var(--text-bright);
@@ -561,10 +561,9 @@ a:focus-visible, button:focus-visible {
     font-size: 1.4rem;
 }
 
-/* Make it responsive for mobile phones */
 @media (max-width: 500px) {
     .interests-grid {
-        grid-template-columns: 1fr; /* Stack cards on very small screens */
+        grid-template-columns: 1fr;
     }
 }
 
@@ -574,11 +573,11 @@ a:focus-visible, button:focus-visible {
     top: 0;
     left: 0;
     width: 0%;
-    height: 4px;
+    height: 5px; /* Slightly thicker */
     background: var(--accent);
     z-index: 9999;
     transition: width 0.1s ease-out;
-    box-shadow: 0 0 10px var(--accent);
+    box-shadow: 0 0 15px var(--accent);
 }
 
 /* --- Typewriter Effect Cursor --- */
@@ -609,14 +608,14 @@ a:focus-visible, button:focus-visible {
 .slide {
     min-width: 100%;
     box-sizing: border-box;
-    padding: 0 40px; /* Space for arrows */
+    padding: 0 40px; 
 }
 
 .project-card {
     background: var(--bg);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-color);
     padding: 30px;
-    border-radius: 12px;
+    border-radius: 20px;
     height: 100%;
     transition: transform 0.3s ease, border-color 0.3s;
 }
@@ -668,7 +667,7 @@ a:focus-visible, button:focus-visible {
 .dot {
     width: 12px;
     height: 12px;
-    background: rgba(255, 255, 255, 0.2);
+    background: var(--dot-bg);
     border-radius: 50%;
     cursor: pointer;
     transition: background 0.3s ease;
@@ -685,11 +684,11 @@ a:focus-visible, button:focus-visible {
 
 /* --- Footer & Contact --- */
 .footer {
-    background: #06080b; /* Slightly darker than your main background */
+    background: var(--footer-bg); 
     padding: 40px 20px;
     text-align: center;
     margin-top: 40px;
-    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    border-top: 1px solid var(--border-color);
 }
 
 .footer-content {
@@ -720,7 +719,8 @@ a:focus-visible, button:focus-visible {
 
 .footer p {
     font-size: 0.9rem;
-    color: rgba(255, 255, 255, 0.5);
+    color: var(--text);
+    opacity: 0.8;
     margin: 0;
 }
 
@@ -738,7 +738,7 @@ a:focus-visible, button:focus-visible {
     align-items: center;
     justify-content: center;
     text-decoration: none;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--border-color);
     transition: all 0.3s;
 }
 
