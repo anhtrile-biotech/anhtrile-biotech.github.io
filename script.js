@@ -85,7 +85,6 @@ let isDeleting = false;
 function typeWriter() {
     const currentTitle = bioTitles[titleIndex];
 
-    // Handle typing and backspacing
     if (isDeleting) {
         typewriterElement.innerHTML = currentTitle.substring(0, charIndex - 1);
         charIndex--;
@@ -94,25 +93,21 @@ function typeWriter() {
         charIndex++;
     }
 
-    // Dynamic typing speed (faster when deleting)
     let typeSpeed = isDeleting ? 40 : 100;
 
-    // Pause at the end of a word
     if (!isDeleting && charIndex === currentTitle.length) {
-        typeSpeed = 2000; // Wait 2 seconds before deleting
+        typeSpeed = 2000; 
         isDeleting = true;
     } 
-    // Move to the next word when fully deleted
     else if (isDeleting && charIndex === 0) {
         isDeleting = false;
         titleIndex = (titleIndex + 1) % bioTitles.length;
-        typeSpeed = 500; // Pause before typing the new word
+        typeSpeed = 500; 
     }
 
     setTimeout(typeWriter, typeSpeed);
 }
 
-// Start typing when page loads
 window.onload = typeWriter;
 
 // --- UNIQUE FEATURE 3: Custom Project Slider ---
@@ -124,7 +119,6 @@ const dotsContainer = document.getElementById('slider-dots');
 
 let currentSlide = 0;
 
-// Create dots
 slides.forEach((_, index) => {
     const dot = document.createElement('div');
     dot.classList.add('dot');
@@ -136,25 +130,21 @@ slides.forEach((_, index) => {
 const dots = Array.from(dotsContainer.children);
 
 function updateSlider() {
-    // Move track
     track.style.transform = `translateX(-${currentSlide * 100}%)`;
-    
-    // Update dots
     dots.forEach(dot => dot.classList.remove('active'));
     dots[currentSlide].classList.add('active');
 }
 
 nextButton.addEventListener('click', () => {
-    currentSlide = (currentSlide + 1) % slides.length; // Loop back to start
+    currentSlide = (currentSlide + 1) % slides.length; 
     updateSlider();
 });
 
 prevButton.addEventListener('click', () => {
-    currentSlide = (currentSlide - 1 + slides.length) % slides.length; // Loop to end
+    currentSlide = (currentSlide - 1 + slides.length) % slides.length; 
     updateSlider();
 });
 
-// Clickable dots
 dots.forEach(dot => {
     dot.addEventListener('click', (e) => {
         currentSlide = parseInt(e.target.dataset.index);
@@ -162,7 +152,7 @@ dots.forEach(dot => {
     });
 });
 
-// --- UNIQUE FEATURE 4: "Living Cells" Background Particle System ---
+// --- UNIQUE FEATURE 4: Abstract DNA Helix Background ---
 const canvas = document.createElement('canvas');
 canvas.id = 'bio-canvas';
 document.body.prepend(canvas);
@@ -174,13 +164,11 @@ canvas.style.left = '0';
 canvas.style.width = '100vw';
 canvas.style.height = '100vh';
 canvas.style.zIndex = '-1';
-canvas.style.pointerEvents = 'none'; // Ensures it doesn't block clicks
-canvas.style.opacity = '0.35'; // Keep it subtle!
+canvas.style.pointerEvents = 'none';
+canvas.style.opacity = '0.4'; // Keep it subtle so text is readable
 
 const ctx = canvas.getContext('2d');
-let cells = [];
 
-// Handle window resizing
 function resizeCanvas() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
@@ -188,51 +176,86 @@ function resizeCanvas() {
 window.addEventListener('resize', resizeCanvas);
 resizeCanvas();
 
-// Define the Cell behavior
-class Cell {
+// Class to generate floating DNA molecules
+class DNAStrand {
     constructor() {
-        this.x = Math.random() * canvas.width;
-        this.y = Math.random() * canvas.height;
-        this.radius = Math.random() * 2.5 + 0.5; // Random cell sizes
-        this.vx = (Math.random() - 0.5) * 0.4; // Very slow, organic movement
-        this.vy = (Math.random() - 0.5) * 0.4;
-        this.alpha = Math.random() * 0.5 + 0.1; // Random opacity
+        this.x = Math.random() * canvas.width; // Random horizontal start
+        this.y = Math.random() * canvas.height + canvas.height; // Start below screen
+        this.length = Math.random() * 200 + 150; // Random length between 150-350px
+        this.amplitude = Math.random() * 15 + 15; // Width of the helix
+        this.speedY = Math.random() * -0.6 - 0.2; // Float up slowly
+        this.rotationSpeed = (Math.random() - 0.5) * 0.04; // Twist speed
+        this.time = Math.random() * 100;
+        this.opacity = Math.random() * 0.4 + 0.2;
     }
-    
+
+    update() {
+        this.y += this.speedY;
+        this.time += this.rotationSpeed;
+
+        // If the strand floats completely past the top of the screen, reset to bottom
+        if (this.y < 0) {
+            this.y = canvas.height + this.length;
+            this.x = Math.random() * canvas.width;
+        }
+        this.draw();
+    }
+
     draw() {
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        const spacing = 15; // Distance between base pairs
+        const frequency = 0.06; // How tight the twists are
         
-        // Grab the current accent color from your CSS theme toggle
+        // Grab the current accent color from CSS
         const rootStyles = getComputedStyle(document.documentElement);
         const accentColor = rootStyles.getPropertyValue('--accent').trim() || '#10b981';
         
         ctx.fillStyle = accentColor;
-        ctx.globalAlpha = this.alpha;
-        ctx.fill();
-    }
-    
-    update() {
-        this.x += this.vx;
-        this.y += this.vy;
+        ctx.strokeStyle = accentColor;
+        ctx.lineWidth = 1.2;
 
-        // Bounce gently off the edges of the screen
-        if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
-        if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
+        for (let i = 0; i < this.length; i += spacing) {
+            const angle = i * frequency + this.time;
+            
+            // X coordinates for the two backbones
+            const x1 = this.x + Math.sin(angle) * this.amplitude;
+            const x2 = this.x + Math.sin(angle + Math.PI) * this.amplitude;
+            const drawY = this.y - i; // Draw upwards from base Y
 
-        this.draw();
+            // 3D Depth perception scale (makes dots look like they wrap around)
+            const scale1 = Math.cos(angle) * 0.5 + 1;
+            const scale2 = Math.cos(angle + Math.PI) * 0.5 + 1;
+
+            // Draw connecting lines (Hydrogen bonds)
+            ctx.globalAlpha = this.opacity * 0.3;
+            ctx.beginPath();
+            ctx.moveTo(x1, drawY);
+            ctx.lineTo(x2, drawY);
+            ctx.stroke();
+
+            // Draw Nodes (Sugar/Phosphate backbone)
+            ctx.globalAlpha = this.opacity;
+            ctx.beginPath();
+            ctx.arc(x1, drawY, 2 * scale1, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.arc(x2, drawY, 2 * scale2, 0, Math.PI * 2);
+            ctx.fill();
+        }
     }
 }
 
-// Generate the cells (Adjust the '60' to add more or fewer cells)
-for (let i = 0; i < 60; i++) {
-    cells.push(new Cell());
+let dnaArray = [];
+// Create enough strands based on screen width (not too crowded)
+const numStrands = Math.max(4, Math.floor(window.innerWidth / 200)); 
+for (let i = 0; i < numStrands; i++) {
+    dnaArray.push(new DNAStrand());
 }
 
-// Animation loop
-function animateCells() {
+// Animation Loop
+function animateDNA() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    cells.forEach(cell => cell.update());
-    requestAnimationFrame(animateCells);
+    dnaArray.forEach(dna => dna.update());
+    requestAnimationFrame(animateDNA);
 }
-animateCells();
+animateDNA();
