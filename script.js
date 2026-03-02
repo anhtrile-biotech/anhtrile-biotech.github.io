@@ -72,20 +72,48 @@ window.addEventListener('scroll', () => {
 });
 
 // --- UNIQUE FEATURE 2: Typewriter Effect ---
-const subtitleText = "E-Commerce Specialist | Senior @ UIT-VNU";
+const bioTitles = [
+    "Biotechnology Student", 
+    "Genetics Enthusiast", 
+    "Lab Researcher",
+];
 const typewriterElement = document.getElementById('typewriter');
-let typeIndex = 0;
+let titleIndex = 0;
+let charIndex = 0;
+let isDeleting = false;
 
 function typeWriter() {
-    if (typeIndex < subtitleText.length) {
-        typewriterElement.innerHTML += subtitleText.charAt(typeIndex);
-        typeIndex++;
-        setTimeout(typeWriter, 50); // Speed of typing in ms
+    const currentTitle = bioTitles[titleIndex];
+
+    // Handle typing and backspacing
+    if (isDeleting) {
+        typewriterElement.innerHTML = currentTitle.substring(0, charIndex - 1);
+        charIndex--;
+    } else {
+        typewriterElement.innerHTML = currentTitle.substring(0, charIndex + 1);
+        charIndex++;
     }
+
+    // Dynamic typing speed (faster when deleting)
+    let typeSpeed = isDeleting ? 40 : 100;
+
+    // Pause at the end of a word
+    if (!isDeleting && charIndex === currentTitle.length) {
+        typeSpeed = 2000; // Wait 2 seconds before deleting
+        isDeleting = true;
+    } 
+    // Move to the next word when fully deleted
+    else if (isDeleting && charIndex === 0) {
+        isDeleting = false;
+        titleIndex = (titleIndex + 1) % bioTitles.length;
+        typeSpeed = 500; // Pause before typing the new word
+    }
+
+    setTimeout(typeWriter, typeSpeed);
 }
+
 // Start typing when page loads
 window.onload = typeWriter;
-
 
 // --- UNIQUE FEATURE 3: Custom Project Slider ---
 const track = document.getElementById('project-slider');
