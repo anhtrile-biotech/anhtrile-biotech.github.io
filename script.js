@@ -165,7 +165,7 @@ canvas.style.width = '100vw';
 canvas.style.height = '100vh';
 canvas.style.zIndex = '-1';
 canvas.style.pointerEvents = 'none';
-canvas.style.opacity = '0.4'; // Keep it subtle so text is readable
+canvas.style.opacity = '0.8'
 
 const ctx = canvas.getContext('2d');
 
