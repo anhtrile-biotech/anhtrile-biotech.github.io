@@ -152,7 +152,6 @@ dots.forEach(dot => {
     });
 });
 
-// --- UNIQUE FEATURE 4: Microscopic Fluid DNA Array ---
 const canvas = document.createElement('canvas');
 canvas.id = 'bio-canvas';
 document.body.prepend(canvas);
