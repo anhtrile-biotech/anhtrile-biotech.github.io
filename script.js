@@ -152,7 +152,7 @@ dots.forEach(dot => {
     });
 });
 
-// --- UNIQUE FEATURE 4: Microscopic Random DNA Array ---
+// --- UNIQUE FEATURE 4: Microscopic Fluid DNA Array ---
 const canvas = document.createElement('canvas');
 canvas.id = 'bio-canvas';
 document.body.prepend(canvas);
@@ -164,8 +164,7 @@ canvas.style.width = '100vw';
 canvas.style.height = '100vh';
 canvas.style.zIndex = '-1';
 canvas.style.pointerEvents = 'none';
-// Set opacity around 60% as requested
-canvas.style.opacity = '0.6'; 
+canvas.style.opacity = '0.7'; // Base canvas opacity
 
 const ctx = canvas.getContext('2d');
 
@@ -178,30 +177,42 @@ resizeCanvas();
 
 class DNAStrand {
     constructor() {
+        // DEPTH creates a 3D parallax effect. 0.2 is "far away", 1.0 is "close up"
+        this.depth = Math.random() * 0.8 + 0.2; 
+
         this.x = Math.random() * canvas.width; 
         this.y = Math.random() * canvas.height; 
         
-        // Much smaller sizes
-        this.length = Math.random() * 80 + 50; // Random length between 50-130px
-        this.amplitude = Math.random() * 6 + 4; // Much narrower helix
+        // Size scales organically based on depth
+        this.length = (Math.random() * 80 + 50) * this.depth; 
+        this.amplitude = (Math.random() * 6 + 4) * this.depth; 
         
-        // Completely random directions (up, down, left, right)
-        this.speedX = (Math.random() - 0.5) * 1.2; 
-        this.speedY = (Math.random() - 0.5) * 1.2; 
+        // Speed scales with depth (closer = faster, further = slower)
+        this.baseSpeedX = (Math.random() - 0.5) * 0.8 * this.depth; 
+        this.baseSpeedY = (Math.random() - 0.5) * 0.8 * this.depth; 
         
-        this.rotationSpeed = (Math.random() - 0.5) * 0.08; // Slightly faster twist for small DNA
+        // Fluid sway properties for biological drifting
+        this.swayOffset = Math.random() * Math.PI * 2;
+        this.swaySpeed = Math.random() * 0.015 + 0.005;
+
+        // Helix twisting speed
+        this.rotationSpeed = (Math.random() - 0.5) * 0.06; 
         this.time = Math.random() * 100;
         
-        // Random orientation angle from 0 to 360 degrees
+        // Tumbling (slowly changing direction)
         this.tiltAngle = Math.random() * Math.PI * 2; 
+        this.tiltSpeed = (Math.random() - 0.5) * 0.006; 
     }
 
     update() {
-        this.x += this.speedX;
-        this.y += this.speedY;
-        this.time += this.rotationSpeed;
+        // Add a gentle sine-wave sway to the movement to simulate liquid
+        this.x += this.baseSpeedX + Math.sin(this.time * this.swaySpeed + this.swayOffset) * 0.5;
+        this.y += this.baseSpeedY + Math.cos(this.time * this.swaySpeed + this.swayOffset) * 0.5;
 
-        // Screen wrap: smoothly reappear on the opposite side if they float off screen
+        this.time += this.rotationSpeed;
+        this.tiltAngle += this.tiltSpeed; // Slowly tumble around
+
+        // Screen wrap
         if (this.x > canvas.width + this.length) this.x = -this.length;
         else if (this.x < -this.length) this.x = canvas.width + this.length;
         
@@ -216,8 +227,11 @@ class DNAStrand {
         ctx.translate(this.x, this.y);
         ctx.rotate(this.tiltAngle);
 
-        const spacing = 8; // Closer spacing for smaller strands
-        const frequency = 0.12; // Tighter twists
+        // Apply translucency based on depth (farther = more faded)
+        ctx.globalAlpha = this.depth * 0.8; 
+
+        const spacing = 8 * this.depth; // Scale spacing between rungs
+        const frequency = 0.12 / this.depth; // Scale tightness of the twist
 
         const backbone1Color = '#3498db'; 
         const backbone2Color = '#e67e22'; 
@@ -227,7 +241,7 @@ class DNAStrand {
         ];
 
         // 1. Draw the "BACK" half of the backbones first
-        ctx.lineWidth = 2.5; // Thinner lines
+        ctx.lineWidth = 2.5 * this.depth; // Line thickness scales with depth
         ctx.lineCap = 'round';
         ctx.lineJoin = 'round';
 
@@ -256,14 +270,14 @@ class DNAStrand {
         ctx.stroke();
 
         // 2. Draw the Base Pairs
-        ctx.lineWidth = 1.5; // Thinner base pairs
+        ctx.lineWidth = 1.5 * this.depth; 
         for (let i = 0; i <= this.length; i += spacing) {
             let phase = i * frequency + this.time;
             let x1 = Math.sin(phase) * this.amplitude;
             let x2 = Math.sin(phase + Math.PI) * this.amplitude;
             let y = i - this.length / 2;
             
-            let colorSet = pairs[(i / spacing) % 2 === 0 ? 0 : 1];
+            let colorSet = pairs[(Math.floor(i / spacing)) % 2 === 0 ? 0 : 1];
 
             ctx.beginPath();
             ctx.moveTo(x1, y);
@@ -279,7 +293,7 @@ class DNAStrand {
         }
 
         // 3. Draw the "FRONT" half of the backbones last
-        ctx.lineWidth = 2.5;
+        ctx.lineWidth = 2.5 * this.depth;
         
         ctx.beginPath();
         for (let i = 0; i <= this.length; i += 2) {
@@ -310,8 +324,8 @@ class DNAStrand {
 }
 
 let dnaArray = [];
-// Draw 25 smaller strands floating randomly
-for (let i = 0; i < 25; i++) {
+// Increased to 35 strands since many will be faint and in the background
+for (let i = 0; i < 35; i++) {
     dnaArray.push(new DNAStrand());
 }
 
