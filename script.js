@@ -152,7 +152,7 @@ dots.forEach(dot => {
     });
 });
 
-// --- UNIQUE FEATURE 4: Minimalist Monochrome DNA Array ---
+// --- UNIQUE FEATURE 4: Dual-Layer Bio Background (DNA + Molecules) ---
 const canvas = document.createElement('canvas');
 canvas.id = 'bio-canvas';
 document.body.prepend(canvas);
@@ -164,7 +164,7 @@ canvas.style.width = '100vw';
 canvas.style.height = '100vh';
 canvas.style.zIndex = '-1';
 canvas.style.pointerEvents = 'none';
-canvas.style.opacity = '0.5'; // Soft opacity so it stays subtle
+canvas.style.opacity = '0.9'; // Soft opacity so it stays subtle
 
 const ctx = canvas.getContext('2d');
 
@@ -175,6 +175,47 @@ function resizeCanvas() {
 window.addEventListener('resize', resizeCanvas);
 resizeCanvas();
 
+// Layer 1: Ambient Molecular Dust
+class Molecule {
+    constructor() {
+        this.x = Math.random() * canvas.width;
+        this.y = Math.random() * canvas.height;
+        // Really small particles
+        this.radius = Math.random() * 1.5 + 0.5; 
+        
+        // Very slow, completely random directions
+        this.vx = (Math.random() - 0.5) * 0.2;
+        this.vy = (Math.random() - 0.5) * 0.2;
+        
+        // Subtle opacity variations
+        this.alpha = Math.random() * 0.4 + 0.1;
+    }
+
+    update(color) {
+        this.x += this.vx;
+        this.y += this.vy;
+
+        // Screen wrap
+        if (this.x > canvas.width + this.radius) this.x = -this.radius;
+        else if (this.x < -this.radius) this.x = canvas.width + this.radius;
+        if (this.y > canvas.height + this.radius) this.y = -this.radius;
+        else if (this.y < -this.radius) this.y = canvas.height + this.radius;
+
+        this.draw(color);
+    }
+
+    draw(color) {
+        ctx.save();
+        ctx.globalAlpha = this.alpha;
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+    }
+}
+
+// Layer 2: Monochrome DNA Strands
 class DNAStrand {
     constructor() {
         this.x = Math.random() * canvas.width; 
@@ -295,21 +336,34 @@ class DNAStrand {
     }
 }
 
+// Arrays to hold our objects
 let dnaArray = [];
-// Exactly 3 small strands
-for (let i = 0; i < 3; i++) {
+let moleculesArray = [];
+
+// Create exactly 3 small strands
+for (let i = 0; i < 4; i++) {
     dnaArray.push(new DNAStrand());
 }
 
+// Create 50 ambient molecules/dots
+for (let i = 0; i < 50; i++) {
+    moleculesArray.push(new Molecule());
+}
+
 // Animation Loop
-function animateDNA() {
+function animateBioCanvas() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
     // Fetch the text color dynamically so it works in both Light & Dark mode
     const rootStyles = getComputedStyle(document.documentElement);
-    const dnaColor = rootStyles.getPropertyValue('--text').trim() || '#ffffff';
+    const themeColor = rootStyles.getPropertyValue('--text').trim() || '#ffffff';
 
-    dnaArray.forEach(dna => dna.update(dnaColor));
-    requestAnimationFrame(animateDNA);
+    // Draw molecules first so they sit slightly behind the DNA
+    moleculesArray.forEach(mol => mol.update(themeColor));
+    
+    // Draw DNA on top
+    dnaArray.forEach(dna => dna.update(themeColor));
+    
+    requestAnimationFrame(animateBioCanvas);
 }
-animateDNA();
+animateBioCanvas();
